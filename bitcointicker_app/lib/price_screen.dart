@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
+import 'coin_data.dart';
 import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
@@ -22,18 +22,18 @@ class _PriceScreenState extends State<PriceScreen> {
     }
 
     return DropdownButton<String>(
-        value: selectedCurrency,
-        items: dropdownItems,
-        onChanged: (value) {
-          print(value);
-          setState(() {
-            selectedCurrency = value!;
-          });
+      value: selectedCurrency,
+      items: dropdownItems,
+      onChanged: (value) {
+        setState(() {
+          selectedCurrency = value!;
         });
+      },
+    );
   }
 
   CupertinoPicker iOSPicker() {
-    List<Widget> pickerItems = [];
+    List<Text> pickerItems = [];
     for (String currency in currenciesList) {
       pickerItems.add(Text(currency));
     }
@@ -41,11 +41,27 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (value) {
-        print(value);
+      onSelectedItemChanged: (selectedIndex) {
+        print(selectedIndex);
       },
       children: pickerItems,
     );
+  }
+
+  //TODO: Create a method here called getData() to get the coin data from coin_data.dart
+  String? bitcoinValueInUSD;
+
+  void getData() async {
+    double data = await CoinData().getCoinData();
+    setState(() {
+      bitcoinValueInUSD = data.toStringAsFixed(2);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
   }
 
   @override
@@ -70,7 +86,8 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  //TODO: Update the Text Widget with the live bitcoin data here.
+                  '1 BTC = $bitcoinValueInUSD USD',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -85,7 +102,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: Platform.isAndroid ? androidDropdown() : iOSPicker(),
+            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
           ),
         ],
       ),
